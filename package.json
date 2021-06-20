@@ -1,0 +1,25 @@
+{
+  "name": "game_of_life",
+  "version": "0.0.1",
+  "description": "Conway's Game of Life Javascript simulation",
+  "main": "index.js",
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jayankmayukh/game_of_life.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jayankmayukh/game_of_life/issues"
+  },
+  "homepage": "https://github.com/jayankmayukh/game_of_life#readme",
+  "devDependencies": {
+    "snowpack": "^3.5.9"
+  },
+  "browserlist": "defaults"
+}
