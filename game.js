@@ -1,6 +1,7 @@
 const LIVE = true
 const DEAD = !LIVE
-let renderSpeed = 1;
+let N = 5
+let renderSpeed = N;
 
 function makeGrid(rows, cols) {
     let grid = new Array(rows)
@@ -23,13 +24,13 @@ function initializeGrid(grid, n, m) {
 function renderGrid(grid, n, m, ctx, rect_size, prev_grid) {
     renderSpeed--;
     if (renderSpeed == 0){
-    renderSpeed = 10
+    renderSpeed = N;
 
     for (let i = 0; i < n; i++) {
         for (let j = 0; j < m; j++) {
             ctx.beginPath()
-            let x = i * rect_size
-            let y = j * rect_size
+            let x = i * (rect_size)
+            let y = j * (rect_size)
 
             if (prev_grid === undefined || grid[i][j] != prev_grid[i][j])
             {
@@ -38,7 +39,7 @@ function renderGrid(grid, n, m, ctx, rect_size, prev_grid) {
                 } else {
                     ctx.fillStyle = 'white'
                 }
-                    ctx.fillRect(x, y, rect_size - 1, rect_size - 1)
+                    ctx.fillRect(x, y, rect_size, rect_size)
                 }
             }
         }
@@ -54,8 +55,7 @@ function getLiveNeigbhorsCount(grid, n, m, x, y) {
     let sum = 0
     for (let i = -1; i < 2; i++) {
         for (let j = -1; j < 2; j++) {
-            if (x + i < 0 || x + i >= n || y + j < 0 || y + j >= m) continue
-            if (grid[x + i][y + j] === LIVE) sum += 1
+            if (grid[(x + i + n)%n][(y + j + m)%m] === LIVE) sum += 1
         }
     }
     sum -= grid[x][y]
@@ -84,6 +84,8 @@ function getNextState(grid, n, m) {
 
 function draw(grid, n, m) {
     const canvas = document.getElementById('gameCanvas')
+    canvas.width = window.innerWidth * 0.8;
+    canvas.height = window.innerHeight * 0.8;
     const width = canvas.width
     const ctx = canvas.getContext('2d')
     let rect_size = width / n
@@ -91,8 +93,8 @@ function draw(grid, n, m) {
 }
 
 function main() {
-    let n = 20
-    let m = 20
+    let n = 200
+    let m = 200
     let myGrid = makeGrid(n, m)
     myGrid = initializeGrid(myGrid, n, m)
     draw(myGrid, n, m)
