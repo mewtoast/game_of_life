@@ -1,12 +1,12 @@
 import { ALIVE, DEAD } from '../constants'
 
 export default class Game {
-    constructor({ size, rows, cols, aliveColor = '#000000', deadColor = '#FFFFFF' }) {
+    constructor({ size, aspect_ratio, aliveColor = '#000000', deadColor = '#FFFFFF' }) {
         this.size = size
-        this.rows = rows
-        this.cols = cols
-        this.height = rows * size
-        this.width = cols * size
+        this.rows = Math.floor(window.innerHeight / size)
+        this.cols = Math.floor(this.rows / aspect_ratio)
+        this.height = window.innerHeight
+        this.width = window.innerHeight / aspect_ratio
         this.canvas = document.createElement('canvas')
         this.ctx = this.canvas.getContext('2d')
         document.body.appendChild(this.canvas)
@@ -38,7 +38,9 @@ export default class Game {
                 const y = j * this.size
                 if (!prevGrid || this.grid[i][j] !== prevGrid[i][j]) {
                     this.ctx.fillStyle = state === ALIVE ? this.aliveColor : this.deadColor
-                    this.ctx.fillRect(x, y, this.size, this.size)
+                    this.ctx.fillRect(x, y, this.size-1, this.size-1)
+                    // this.ctx.arc(x + this.size/2, y + this.size /2, Math.floor(this.size/2 - 1), 0, Math.PI * 2, false)
+                    // this.ctx.fill()
                 }
             })
         })
@@ -87,8 +89,9 @@ export default class Game {
     }
 
     play() {
-        this.playing = true
-        this.gameLoop()
+        // this.playing = true
+        if (!this.playing)
+            this.gameLoop()
     }
 
     pause() {
