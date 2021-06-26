@@ -1,7 +1,8 @@
-import { ALIVE, DEAD } from '../constants'
+import { ALIVE, DEAD, SPEED } from '../constants'
 
 export default class Game {
     constructor({ size, aspectRatio, aliveColor = '#000000', deadColor = '#FFFFFF' }) {
+        this.frame_skip = SPEED
         this.size = size
         this.rows = Math.floor(window.innerHeight / size)
         this.cols = Math.floor(this.rows / aspectRatio)
@@ -82,13 +83,16 @@ export default class Game {
 
     gameLoop() {
         requestAnimationFrame(() => {
+            this.frame_skip--;
+            if (this.frame_skip == 0){
+                this.frame_skip = SPEED
             const prevGrid = this.grid
             this.grid = this.getNextGridState()
             this.renderGrid(prevGrid)
-            if (this.playing) {
-                this.gameLoop()
             }
+            this.gameLoop()
         })
+    
     }
 
     play() {
