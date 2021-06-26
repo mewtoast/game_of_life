@@ -2,7 +2,7 @@ import { ALIVE, DEAD, SPEED } from '../constants'
 
 export default class Game {
     constructor({ size, aspectRatio, aliveColor = '#000000', deadColor = '#FFFFFF' }) {
-        this.frame_skip = SPEED
+        this.countSkip = SPEED
         this.size = size
         this.rows = Math.floor(window.innerHeight / size)
         this.cols = Math.floor(this.rows / aspectRatio)
@@ -48,7 +48,7 @@ export default class Game {
     }
 
     getIndex(i, maxI) {
-        return (i + maxI) % (maxI)
+        return (i + maxI) % maxI
     }
 
     getLiveNeigbhorsCount(x, y) {
@@ -81,18 +81,27 @@ export default class Game {
         return newGrid
     }
 
+    skipFrame() {
+        this.countSkip--
+        if (this.countSkip == 0) {
+            this.countSkip = SPEED
+            return false
+        }
+        return true
+    }
+
     gameLoop() {
         requestAnimationFrame(() => {
-            this.frame_skip--;
-            if (this.frame_skip == 0){
-                this.frame_skip = SPEED
-            const prevGrid = this.grid
-            this.grid = this.getNextGridState()
-            this.renderGrid(prevGrid)
+            if (!this.skipFrame()) {
+                this.countSkip = SPEED
+                const prevGrid = this.grid
+                this.grid = this.getNextGridState()
+                this.renderGrid(prevGrid)
             }
-            this.gameLoop()
+            if (this.playing) {
+                this.gameLoop()
+            }
         })
-    
     }
 
     play() {
