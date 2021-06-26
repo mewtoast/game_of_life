@@ -1,12 +1,13 @@
-import { ALIVE, DEAD } from '../constants'
+import { ALIVE, DEAD, SPEED } from '../constants'
 
 export default class Game {
-    constructor({ size, rows, cols, aliveColor = '#000000', deadColor = '#FFFFFF' }) {
+    constructor({ size, aspectRatio, aliveColor = '#000000', deadColor = '#FFFFFF' }) {
+        this.countSkip = SPEED
         this.size = size
-        this.rows = rows
-        this.cols = cols
-        this.height = rows * size
-        this.width = cols * size
+        this.rows = Math.floor(window.innerHeight / size)
+        this.cols = Math.floor(this.rows / aspectRatio)
+        this.height = this.rows * size
+        this.width = this.cols * size
         this.canvas = document.createElement('canvas')
         this.ctx = this.canvas.getContext('2d')
         document.body.appendChild(this.canvas)
@@ -38,21 +39,26 @@ export default class Game {
                 const y = j * this.size
                 if (!prevGrid || this.grid[i][j] !== prevGrid[i][j]) {
                     this.ctx.fillStyle = state === ALIVE ? this.aliveColor : this.deadColor
-                    this.ctx.fillRect(x, y, this.size, this.size)
+                    this.ctx.fillRect(x, y, this.size - 1, this.size - 1)
+                    // this.ctx.arc(x + this.size/2, y + this.size /2, Math.floor(this.size/2 - 1), 0, Math.PI * 2, false)
+                    // this.ctx.fill()
                 }
             })
         })
+    }
+
+    getIndex(i, maxI) {
+        return (i + maxI) % maxI
     }
 
     getLiveNeigbhorsCount(x, y) {
         let sum = 0
         for (let i = -1; i < 2; i++) {
             for (let j = -1; j < 2; j++) {
-                const col = x + i
-                const row = y + j
-                const isOutOfBound = col < 0 || col >= this.cols || row < 0 || row >= this.rows
+                const col = this.getIndex(x + i, this.cols)
+                const row = this.getIndex(y + j, this.rows)
                 const isSelf = i == 0 && j === 0
-                const isLiveNeigbhor = !isOutOfBound && !isSelf && this.grid[col][row] === ALIVE
+                const isLiveNeigbhor = !isSelf && this.grid[col][row] === ALIVE
                 sum += isLiveNeigbhor ? 1 : 0
             }
         }
@@ -75,11 +81,23 @@ export default class Game {
         return newGrid
     }
 
+    skipFrame() {
+        this.countSkip--
+        if (this.countSkip == 0) {
+            this.countSkip = SPEED
+            return false
+        }
+        return true
+    }
+
     gameLoop() {
         requestAnimationFrame(() => {
-            const prevGrid = this.grid
-            this.grid = this.getNextGridState()
-            this.renderGrid(prevGrid)
+            if (!this.skipFrame()) {
+                this.countSkip = SPEED
+                const prevGrid = this.grid
+                this.grid = this.getNextGridState()
+                this.renderGrid(prevGrid)
+            }
             if (this.playing) {
                 this.gameLoop()
             }
@@ -87,8 +105,10 @@ export default class Game {
     }
 
     play() {
-        this.playing = true
-        this.gameLoop()
+        if (!this.playing) {
+            this.playing = true
+            this.gameLoop()
+        }
     }
 
     pause() {
