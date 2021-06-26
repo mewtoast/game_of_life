@@ -1,7 +1,8 @@
-import { ALIVE, DEAD } from '../constants'
+import { ALIVE, DEAD, SPEED } from '../constants'
 
 export default class Game {
     constructor({ size, aspect_ratio, aliveColor = '#000000', deadColor = '#FFFFFF' }) {
+        this.frame_skip = SPEED
         this.size = size
         this.rows = Math.floor(window.innerHeight / size)
         this.cols = Math.floor(this.rows / aspect_ratio)
@@ -50,11 +51,11 @@ export default class Game {
         let sum = 0
         for (let i = -1; i < 2; i++) {
             for (let j = -1; j < 2; j++) {
-                const col = x + i
-                const row = y + j
-                const isOutOfBound = col < 0 || col >= this.cols || row < 0 || row >= this.rows
-                const isSelf = i == 0 && j === 0
-                const isLiveNeigbhor = !isOutOfBound && !isSelf && this.grid[col][row] === ALIVE
+                const col = (x + i + this.cols)%(this.cols)
+                const row = (y + j + this.rows)%(this.rows)
+                // const isOutOfBound = col < 0 || col >= this.cols || row < 0 || row >= this.rows
+                const isSelf = i === 0 && j === 0
+                const isLiveNeigbhor = !isSelf && this.grid[col][row] === ALIVE
                 sum += isLiveNeigbhor ? 1 : 0
             }
         }
@@ -79,19 +80,25 @@ export default class Game {
 
     gameLoop() {
         requestAnimationFrame(() => {
+            this.frame_skip--;
+            if (this.frame_skip == 0){
+                this.frame_skip = SPEED
             const prevGrid = this.grid
             this.grid = this.getNextGridState()
             this.renderGrid(prevGrid)
-            if (this.playing) {
-                this.gameLoop()
             }
+            this.gameLoop()
         })
+    
     }
 
     play() {
         // this.playing = true
         if (!this.playing)
-            this.gameLoop()
+            {   
+                this.playing = true;
+                this.gameLoop()
+            }
     }
 
     pause() {
