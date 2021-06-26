@@ -26,9 +26,5 @@ module.exports = {
         '**/package-lock.json',
         '**/README.md',
         '**/*.config.js',
-    ],
-    optimize: {
-        bundle: true,
-        minify: true,
-    },
+    ]
 }
