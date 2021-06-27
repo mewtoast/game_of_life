@@ -6,8 +6,8 @@
   "scripts": {
     "start": "snowpack dev",
     "build": "tsc --noEmit && snowpack build",
-    "lint": "eslint --cache --ext .js,.jsx ./src/",
-    "lint:fix": "eslint --cache --fix --ext .js,.jsx ./src/",
+    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx ./src/",
+    "lint:fix": "eslint --cache --fix --ext .js,.jsx,.ts,.tsx ./src/",
     "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
