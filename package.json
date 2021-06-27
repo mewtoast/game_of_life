@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "snowpack dev",
-    "build": "tsc --noEmit && snowpack build",
+    "build": "npm run lint && npm run typecheck && snowpack build",
     "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx ./src/",
     "lint:fix": "eslint --cache --fix --ext .js,.jsx,.ts,.tsx ./src/",
     "typecheck": "tsc --noEmit",
