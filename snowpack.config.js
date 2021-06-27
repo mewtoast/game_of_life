@@ -7,7 +7,7 @@ module.exports = {
         /* ... */
     },
     plugins: [
-        /* ... */
+        '@snowpack/plugin-postcss',
     ],
     packageOptions: {
         /* ... */
@@ -15,6 +15,7 @@ module.exports = {
     devOptions: {
         open: 'chrome',
         port: 3000,
+        tailwindConfig: './tailwind.config.js',
     },
     buildOptions: {
         /* ... */
@@ -26,5 +27,13 @@ module.exports = {
         '**/package-lock.json',
         '**/README.md',
         '**/*.config.js',
-    ]
+        '**/tsconfig.json',
+    ],
+    optimize: {
+        minify: true,
+    },
+    alias: {
+        react: 'preact/compat',
+        'react-dom': 'preact/compat',
+    },
 }

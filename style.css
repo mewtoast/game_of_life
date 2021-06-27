@@ -1,6 +1,8 @@
-body {
-  background: #ffffff;
-  color: #f8f8f8;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* body {
   margin: 0;
 }
 canvas {
@@ -9,4 +11,4 @@ canvas {
   margin: 0 auto;
   margin-bottom: 0;
   display: block;
-}
+} */
