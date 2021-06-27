@@ -36,7 +36,9 @@ export default class Game {
         this.height = this.rows * size;
         this.width = this.cols * size;
         this.canvas = document.createElement('canvas');
-        this.ctx = this.canvas.getContext('2d')!; // assuming we'll never get null
+        // assuming we'll never get null
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.ctx = this.canvas.getContext('2d')!;
         renderAt.appendChild(this.canvas);
         this.canvas.width = this.width;
         this.canvas.height = this.height;
@@ -48,7 +50,7 @@ export default class Game {
         this.renderGrid();
     }
 
-    protected populate() {
+    protected populate(): void {
         for (let i = 0; i < this.cols; i += 1) {
             const col = [];
             for (let j = 0; j < this.rows; j += 1) {
@@ -59,7 +61,7 @@ export default class Game {
         }
     }
 
-    protected renderGrid(prevGrid?: Game['grid']) {
+    protected renderGrid(prevGrid?: Game['grid']): void {
         this.grid.forEach((col, i) => {
             col.forEach((state, j) => {
                 const x = i * this.size;
@@ -74,11 +76,11 @@ export default class Game {
         });
     }
 
-    static getIndex(i: number, maxI: number) {
+    static getIndex(i: number, maxI: number): number {
         return (i + maxI) % maxI;
     }
 
-    protected getLiveNeigbhorsCount(x: number, y: number) {
+    protected getLiveNeigbhorsCount(x: number, y: number): number {
         let sum = 0;
         for (let i = -1; i < 2; i += 1) {
             for (let j = -1; j < 2; j += 1) {
@@ -92,7 +94,7 @@ export default class Game {
         return sum;
     }
 
-    protected getNextGridState() {
+    protected getNextGridState(): Game['grid'] {
         let newGrid = this.grid.map((col, i) =>
             col.map((state, j) => {
                 const liveNeighbors = this.getLiveNeigbhorsCount(i, j);
@@ -108,7 +110,7 @@ export default class Game {
         return newGrid;
     }
 
-    protected skipFrame() {
+    protected skipFrame(): boolean {
         this.countSkip -= 1;
         if (this.countSkip === 0) {
             this.countSkip = SPEED;
@@ -117,7 +119,7 @@ export default class Game {
         return true;
     }
 
-    protected gameLoop() {
+    protected gameLoop(): void {
         requestAnimationFrame(() => {
             if (!this.skipFrame()) {
                 this.countSkip = SPEED;
@@ -131,18 +133,18 @@ export default class Game {
         });
     }
 
-    isPlaying() {
+    isPlaying(): boolean {
         return this.playing;
     }
 
-    play() {
+    play(): void {
         if (!this.playing) {
             this.playing = true;
             this.gameLoop();
         }
     }
 
-    pause() {
+    pause(): void {
         this.playing = false;
     }
 }

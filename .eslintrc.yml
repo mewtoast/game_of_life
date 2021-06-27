@@ -14,7 +14,7 @@ plugins:
 
 settings:
     react:
-        version: detect
+        version: "16"
 
 extends:
     - eslint:recommended
@@ -30,10 +30,7 @@ rules:
     no-prototype-builtins: off
     radix: [error, as-needed]
     react/jsx-props-no-spreading: off
-    import/extensions:
-        - error
-        - ignorePackages
-        - { js: never, jsx: never, ts: never, tsx: never }
+    import/extensions: off
     consistent-return: off
     react-hooks/exhaustive-deps: off # causes eslint crash in vscode, enable after fix is found.
     lines-between-class-members:
@@ -43,6 +40,11 @@ rules:
     import/order: off
     import/no-unresolved: off
     react/prop-types: off
+    react/jsx-filename-extension:
+        - error
+        - extensions:
+            - .jsx
+            - .tsx 
     no-use-before-define: off # TS counterpart enabled
     '@typescript-eslint/no-use-before-define': error
     no-shadow: off # ts counterpart enabled
