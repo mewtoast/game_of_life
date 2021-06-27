@@ -1,0 +1,49 @@
+env:
+    browser: true
+    es6: true
+
+parserOptions:
+    ecmaFeatures:
+        jsx: true
+    ecmaVersion: 12
+    sourceType: module
+
+plugins:
+    - react
+    - prettier
+
+settings:
+    react:
+        version: detect
+
+extends:
+    - eslint:recommended
+    - airbnb/base
+    - airbnb/rules/react
+    - airbnb/hooks
+    - plugin:@typescript-eslint/recommended
+    - plugin:prettier/recommended
+
+rules:
+    # rules from Airbnb that we don't want or want to modify
+    prefer-const: off
+    no-prototype-builtins: off
+    radix: [error, as-needed]
+    react/jsx-props-no-spreading: off
+    import/extensions:
+        - error
+        - ignorePackages
+        - { js: never, jsx: never, ts: never, tsx: never }
+    consistent-return: off
+    react-hooks/exhaustive-deps: off # causes eslint crash in vscode, enable after fix is found.
+    lines-between-class-members:
+        - error
+        - always
+        - exceptAfterSingleLine: true
+    import/order: off
+    import/no-unresolved: off
+    react/prop-types: off
+    no-use-before-define: off # TS counterpart enabled
+    '@typescript-eslint/no-use-before-define': error
+    no-shadow: off # ts counterpart enabled
+    '@typescript-eslint/no-shadow': error
