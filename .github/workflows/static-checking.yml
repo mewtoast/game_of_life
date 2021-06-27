@@ -16,6 +16,6 @@ jobs:
         with:
           node-version: ^14.0.0
       - name: Install Dependencies
-        run: bahmutov/npm-install@v1.6.0
+        run: bahmutov/npm-install@v1.7.7
       - name: Run Stactic Check
         run: npm run static-check
