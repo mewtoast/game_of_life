@@ -1,4 +1,4 @@
-import { ALIVE, DEAD, SPEED } from '../constants';
+import { SPEED } from '../constants';
 
 export interface GameInput {
     size: number;
@@ -8,9 +8,13 @@ export interface GameInput {
     deadColor?: string;
 }
 
+type oneZero = 0 | 1;
+
 export default class Game {
     protected countSkip: number;
     protected size: number;
+    protected centerOffset: number;
+    protected radius: number;
     protected rows: number;
     protected cols: number;
     protected height: number;
@@ -19,20 +23,31 @@ export default class Game {
     protected ctx: CanvasRenderingContext2D;
     protected aliveColor: string;
     protected deadColor: string;
-    protected grid: number[][];
+    protected gridBuffers: [ArrayBuffer, ArrayBuffer];
+    protected grids: [Int8Array, Int8Array];
+    protected curr: oneZero;
+    protected next: oneZero;
     protected playing: boolean;
 
     constructor({
         size,
         aspectRatio,
         renderAt,
-        aliveColor = '#000000',
+        aliveColor = '#283858',
         deadColor = '#FFFFFF',
     }: GameInput) {
+        this.curr = 0;
+        this.next = 1;
         this.countSkip = SPEED;
         this.size = size;
-        this.rows = Math.floor(window.innerHeight / size);
-        this.cols = Math.floor(this.rows / aspectRatio);
+        this.centerOffset = Math.ceil(size / 2);
+        this.radius = Math.ceil(this.size / 4);
+        const isWide = window.innerWidth > window.innerHeight;
+        const smallerSideAbs = isWide ? window.innerHeight : window.innerWidth;
+        const smallerSide = Math.floor(smallerSideAbs / size);
+        const biggerSide = Math.floor(smallerSide * aspectRatio);
+        this.rows = isWide ? smallerSide : biggerSide;
+        this.cols = isWide ? biggerSide : smallerSide;
         this.height = this.rows * size;
         this.width = this.cols * size;
         this.canvas = document.createElement('canvas');
@@ -44,36 +59,55 @@ export default class Game {
         this.canvas.height = this.height;
         this.aliveColor = aliveColor;
         this.deadColor = deadColor;
-        this.grid = [];
+        this.gridBuffers = [
+            new ArrayBuffer(Math.ceil((this.rows * this.cols) / 8)),
+            new ArrayBuffer(Math.ceil((this.rows * this.cols) / 8)),
+        ];
+        this.grids = [new Int8Array(this.gridBuffers[0]), new Int8Array(this.gridBuffers[1])];
         this.playing = false;
         this.populate();
-        this.renderGrid();
+        this.renderNextGrid(true);
+        this.play();
+    }
+
+    protected setBit(i: number, j: number, val: boolean): void {
+        const bitIndex = j + this.rows * i;
+        const index = (bitIndex / 8) | 0;
+        if (val) {
+            this.grids[this.next][index] |= 1 << bitIndex % 8;
+        } else {
+            this.grids[this.next][index] &= (1 << bitIndex % 8) ^ 0xffffffff;
+        }
+    }
+
+    protected getBit(i: number, j: number, gridInd: oneZero): boolean {
+        const bitIndex = j + this.rows * i;
+        const index = (bitIndex / 8) | 0;
+        return !!(this.grids[gridInd][index] & (1 << bitIndex % 8));
     }
 
     protected populate(): void {
         for (let i = 0; i < this.cols; i += 1) {
-            const col = [];
             for (let j = 0; j < this.rows; j += 1) {
-                const cellState = Math.random() > 0.5 ? ALIVE : DEAD;
-                col.push(cellState);
+                this.setBit(i, j, Math.random() > 0.7);
             }
-            this.grid.push(col);
         }
     }
 
-    protected renderGrid(prevGrid?: Game['grid']): void {
-        this.grid.forEach((col, i) => {
-            col.forEach((state, j) => {
+    protected renderNextGrid(paintAll = false): void {
+        for (let i = 0; i < this.cols; i += 1) {
+            for (let j = 0; j < this.rows; j += 1) {
                 const x = i * this.size;
                 const y = j * this.size;
-                if (!prevGrid || this.grid[i][j] !== prevGrid[i][j]) {
-                    this.ctx.fillStyle = state === ALIVE ? this.aliveColor : this.deadColor;
-                    this.ctx.fillRect(x, y, this.size - 1, this.size - 1);
-                    // this.ctx.arc(x + this.size/2, y + this.size /2, Math.floor(this.size/2 - 1), 0, Math.PI * 2, false)
-                    // this.ctx.fill()
+                const aliveInNext = this.getBit(i, j, this.next);
+                const isDifferent = this.getBit(i, j, this.curr) !== aliveInNext;
+                if (paintAll || isDifferent) {
+                    this.ctx.fillStyle = aliveInNext ? this.aliveColor : this.deadColor;
+                    this.ctx.fillRect(x, y, this.centerOffset, this.centerOffset);
                 }
-            });
-        });
+            }
+        }
+        this.switchGrids();
     }
 
     static getIndex(i: number, maxI: number): number {
@@ -87,27 +121,34 @@ export default class Game {
                 const col = Game.getIndex(x + i, this.cols);
                 const row = Game.getIndex(y + j, this.rows);
                 const isSelf = i === 0 && j === 0;
-                const isLiveNeigbhor = !isSelf && this.grid[col][row] === ALIVE;
+                const isLiveNeigbhor = !isSelf && this.getBit(col, row, this.curr);
                 sum += isLiveNeigbhor ? 1 : 0;
+                if (sum > 3) {
+                    return sum;
+                }
             }
         }
         return sum;
     }
 
-    protected getNextGridState(): Game['grid'] {
-        let newGrid = this.grid.map((col, i) =>
-            col.map((state, j) => {
+    protected setNextGridState(): void {
+        for (let i = 0; i < this.cols; i += 1) {
+            for (let j = 0; j < this.rows; j += 1) {
                 const liveNeighbors = this.getLiveNeigbhorsCount(i, j);
                 if (liveNeighbors === 3) {
-                    return ALIVE;
+                    this.setBit(i, j, true);
+                } else if (liveNeighbors < 2 || liveNeighbors > 3) {
+                    this.setBit(i, j, false);
+                } else {
+                    this.setBit(i, j, this.getBit(i, j, this.curr));
                 }
-                if (liveNeighbors < 2 || liveNeighbors > 3) {
-                    return DEAD;
-                }
-                return state;
-            })
-        );
-        return newGrid;
+            }
+        }
+    }
+
+    protected switchGrids(): void {
+        this.curr = Number(!this.curr) as oneZero;
+        this.next = Number(!this.next) as oneZero;
     }
 
     protected skipFrame(): boolean {
@@ -122,10 +163,8 @@ export default class Game {
     protected gameLoop(): void {
         requestAnimationFrame(() => {
             if (!this.skipFrame()) {
-                this.countSkip = SPEED;
-                const prevGrid = this.grid;
-                this.grid = this.getNextGridState();
-                this.renderGrid(prevGrid);
+                this.setNextGridState();
+                this.renderNextGrid();
             }
             if (this.playing) {
                 this.gameLoop();

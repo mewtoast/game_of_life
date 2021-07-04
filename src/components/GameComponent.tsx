@@ -18,5 +18,5 @@ export default function GameComponent({
             // gameRef.current.canvas.classList.add
         }
     });
-    return <div className="game" ref={gameDiv} />;
+    return <div className="m-auto" ref={gameDiv} />;
 }

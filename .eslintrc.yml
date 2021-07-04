@@ -49,3 +49,5 @@ rules:
     '@typescript-eslint/no-use-before-define': error
     no-shadow: off # ts counterpart enabled
     '@typescript-eslint/no-shadow': error
+    react/button-has-type: off
+    no-bitwise: off

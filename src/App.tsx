@@ -18,7 +18,7 @@ function App() {
     return (
         <div className="app">
             <div className="settings" />
-            <div className="game-holder" onClick={() => togglePlay()}>
+            <div className="flex h-screen" onClick={() => togglePlay()}>
                 <GameComponent aspectRatio={ASPECT_RATIO['4x3']} size={4} gameRef={game} />
             </div>
         </div>
