@@ -1,3 +1,2 @@
-export const ALIVE = 1;
-export const DEAD = 0;
+// eslint-disable-next-line import/prefer-default-export
 export const SPEED = 2;
